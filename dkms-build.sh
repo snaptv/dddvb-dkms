@@ -2,7 +2,8 @@
 
 # configuration
 
-NAME=snaptv-analog
+NAME=snaptv-dddvb
+sub_repo=dddvb
 no_option_cmds="ifprdx"
 KERNEL_VERSION=3.13.0-61-lowlatency
 KERNEL_ARCH=x86_64
@@ -15,10 +16,9 @@ Script that produces the debian package of the drivers (dkms-binary-style)
 Arguments:
   No option: assume virtual env, do everything
   h: "help"
-  P: "Probe" (git) generate a temp branch and probe every step by committing
   i: "install" Prepare for build by installing required packages
   c: clean
-  f: "Fetch git commit pointed to by source-version
+  f: "Fetch sources
   p: "Patch sources so they are prepared for compilation"
   r: "build - rebuild"
   m: "modules" Needed if there is no file named "modules",
@@ -28,12 +28,12 @@ Arguments:
   x: "Clean up after build"
   z: "Install" install the debian package
   
-  v: "View info about dkms sources and modules"
+  v: "View info about (alien) dkms sources and modules"
 
   icfprdxz: Any combination of these command letters might be used
 
 Example:
-  sudo ./dkms-build.sh fprdx
+  sudo ./dkms-build.sh fprdxv
 
 '
 [[ $cmds =~ h ]] && exit
@@ -44,38 +44,21 @@ function leave {
 
 [ "$EUID" -ne 0 ] && leave "Please run as root"
 
-HASH=$(git describe --tag --always $source_version)
-LONGVER=$(snap-make-changelog -c | head -1)
-VERSION=$(echo $HASH | sed 's/-g.......$//')
-
-curr_branch=$(git branch | grep \* | cut -d ' ' -f2)
-
-[ "$curr_branch" == "temp" ] && leave "Branch named temp is reserved for debug"
-
-function probe {
-    git add --all
-    git commit --allow-empty -m "$1"
-}
-function prepare_probing {
-    [ "$(git branch | egrep "^[ ]*temp-old$")" ] && git branch -D temp-old
-    [ "$(git branch | egrep "^[ ]*temp$")" ] && git branch -m temp temp-old
-    git branch temp
-    git checkout temp
-    probe "Probing starts, cmds = $cmds" 
-}
-function end_probing {
-    git checkout $curr_branch
-}
 function do_clean {
+    pushd $sub_repo
     git clean -f
     git clean -fd
     git clean -fX
     git reset --hard
     git checkout .
+    popd
 }
 
 [[ $cmds =~ c ]] && do_clean
-[[ $cmds =~ P ]] && prepare_probing
+
+HASH=$(cd $sub_repo && git describe --tag --always HEAD)
+LONGVER=$(snap-make-changelog -c | head -1)
+VERSION=$(echo $HASH | sed 's/-g.......$//')
 
 if [[ $cmds =~ i ]]; then
     apt-get update
@@ -101,17 +84,16 @@ ID=$NAME/$FULL_VERSION
 LIB_DIR=/var/lib/dkms/$ID
 
 if [[ $cmds =~ f ]]; then
-    git checkout $source_version -- .
-    git reset
-    [[ $cmds =~ P ]] && probe "f - Fetched source"
+    git submodule init
+    git submodule update
 fi
 
+pushd $sub_repo
 
 if [[ $cmds =~ p ]]; then
-    for file in $(find patches -type f | sort) ; do
+    for file in $(find ../patches -type f | sort) ; do
         patch -p1 <$file
     done
-    [[ $cmds =~ P ]] && probe "p - Patched source"
 fi
 
 
@@ -171,6 +153,8 @@ BUILD_EXCLUSIVE_KERNEL='^$KERNEL_VERSION'" > dkms.conf
 
 fi
 
+popd
+
 if [[ $cmds =~ d ]]; then
 
     DEB=$(find $LIB_DIR/deb/ -type f)
@@ -206,4 +190,3 @@ if [[ $cmds =~ z ]]; then
 fi
 
 [[ $cmds =~ v ]] && ls -l /usr/src/* /var/lib/dkms/*/* | cut -d : -f1 | grep \^/ | grep ~g
-[[ $cmds =~ P ]] && end_probing
