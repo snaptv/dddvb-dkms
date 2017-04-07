@@ -4,7 +4,6 @@
 
 NAME=snaptv-analog
 no_option_cmds="ifprdx"
-source_version=37de742aadfd6a1fd0cc33928b802c38c13b15d5
 KERNEL_VERSION=3.13.0-61-lowlatency
 KERNEL_ARCH=x86_64
 build_command="make -j4"
