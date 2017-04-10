@@ -97,7 +97,7 @@ if [[ $cmds =~ p ]]; then
     done
 fi
 
-[ -e modules ] && modules=$(cat modules) || modules='unknown'
+[ -e ../modules ] && modules=$(cat ../modules) || modules='unknown'
 
 if [[ $cmds =~ m ]]; then
     $build_command
