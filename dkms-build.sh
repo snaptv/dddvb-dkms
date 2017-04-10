@@ -20,10 +20,10 @@ Arguments:
   c: clean
   f: "Fetch sources
   p: "Patch sources so they are prepared for compilation"
+  m: "modules" Use to generate the file named "modules".
+     Makes a list of all modules the driver consists of.
+     (The file "modules" normally contains a sub-set of these modules.)
   r: "build - rebuild"
-  m: "modules" Needed if there is no file named "modules",
-     Makes a list of all modules the driver consists of. (The file "modules"
-     normally contains a sub-set of these modules.)
   d: "Generate debian packet"
   x: "Clean up after build"
   z: "Install" install the debian package
@@ -97,6 +97,7 @@ if [[ $cmds =~ p ]]; then
     done
 fi
 
+[ -e modules ] && modules=$(cat modules) || modules='unknown'
 
 if [[ $cmds =~ m ]]; then
     $build_command
@@ -106,12 +107,6 @@ fi
 if [[ $cmds =~ r ]]; then
 
     rsync -uav --exclude=.git ./ /usr/src/$NAME-$FULL_VERSION >/dev/null
-    if [ -e modules ]; then
-        modules=$(cat modules)
-    else
-        $build_command
-        modules=$(find -name *.ko | awk -F/ '{print $NF}' | cut -d. -f1 | sort)
-    fi
 
     echo "
 PACKAGE_NAME=$NAME
