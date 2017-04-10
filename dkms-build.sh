@@ -56,10 +56,6 @@ function do_clean {
 
 [[ $cmds =~ c ]] && do_clean
 
-HASH=$(cd $sub_repo && git describe --tag --always HEAD)
-LONGVER=$(snap-make-changelog -c | head -1)
-VERSION=$(echo $HASH | sed 's/-g.......$//')
-
 if [[ $cmds =~ i ]]; then
     apt-get update
     apt-get install -y \
@@ -78,17 +74,22 @@ if [[ $cmds =~ i ]]; then
             snaptv-package-builder
 fi
 
-KERNEL_VERSION_ARCH=$KERNEL_VERSION/$KERNEL_ARCH
-FULL_VERSION=$VERSION-snaptv-$LONGVER
-ID=$NAME/$FULL_VERSION
-LIB_DIR=/var/lib/dkms/$ID
-
 if [[ $cmds =~ f ]]; then
     git submodule init
     git submodule update
 fi
 
+LONGVER=$(snap-make-changelog -c | head -1)
+
 pushd $sub_repo
+
+HASH=$(git describe --tag --always HEAD)
+VERSION=$(echo $HASH | sed 's/-g.......$//')
+
+KERNEL_VERSION_ARCH=$KERNEL_VERSION/$KERNEL_ARCH
+FULL_VERSION=$VERSION-snaptv-$LONGVER
+ID=$NAME/$FULL_VERSION
+LIB_DIR=/var/lib/dkms/$ID
 
 if [[ $cmds =~ p ]]; then
     for file in $(find ../patches -type f | sort) ; do
