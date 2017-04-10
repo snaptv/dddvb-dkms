@@ -184,4 +184,4 @@ if [[ $cmds =~ z ]]; then
     fi
 fi
 
-[[ $cmds =~ v ]] && ls -l /usr/src/* /var/lib/dkms/*/* | cut -d : -f1 | grep \^/ | grep ~g
+[[ $cmds =~ v ]] && ls -l /usr/src/* /var/lib/dkms/*/* | cut -d : -f1 | grep \^/ | grep ~g || echo "Done"
