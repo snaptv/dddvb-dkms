@@ -174,7 +174,6 @@ if [[ $cmds =~ x ]]; then
     dkms remove $ID -k $KERNEL_VERSION
     rm -fr /usr/src/"$NAME"-"$FULL_VERSION"
     rm -fr ~/"$HASH"
-    do_clean
 fi
 
 if [[ $cmds =~ z ]]; then
