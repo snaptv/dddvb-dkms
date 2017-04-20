@@ -3,11 +3,12 @@
 # configuration
 
 NAME=snaptv-dddvb
-sub_repo=dddvb
-no_option_cmds="ifprdx"
+build_command="make -j4"
+
+sub_repo=$(git submodule status | awk '{print $2}')
+no_option_cmds="cfprdx"
 KERNEL_VERSION=3.13.0-61-lowlatency
 KERNEL_ARCH=x86_64
-build_command="make -j4"
 
 [ $# -ne 0 ] && cmds=$1 || cmds=$no_option_cmds
 helptext='
@@ -27,13 +28,13 @@ Arguments:
   d: "Generate debian packet"
   x: "Clean up after build"
   z: "Install" install the debian package
-  
+
   v: "View info about (alien) dkms sources and modules"
 
   icfprdxz: Any combination of these command letters might be used
 
 Example:
-  sudo ./dkms-build.sh fprdxv
+  sudo ./dkms-build.sh cfprdxz
 
 '
 [[ $cmds =~ h ]] && exit
@@ -45,16 +46,15 @@ function leave {
 [ "$EUID" -ne 0 ] && leave "Please run as root"
 
 function do_clean {
-    pushd $sub_repo
-    git clean -f
-    git clean -fd
-    git clean -fX
-    git reset --hard
-    git checkout .
-    popd
+    [ -e $1 ] && rm -r $1
+    mkdir -p $1
 }
 
-[[ $cmds =~ c ]] && do_clean
+[[ $cmds =~ c ]] && do_clean $sub_repo
+
+if [[ $cmds =~ r ]]; then
+    [ $(dpkg --print-avail snaptv-package-builder | grep -i 'not available') ] && cmd="i$cmd"
+fi
 
 if [[ $cmds =~ i ]]; then
     apt-get update
@@ -143,7 +143,7 @@ BUILD_EXCLUSIVE_KERNEL='^$KERNEL_VERSION'" > dkms.conf
 
     mkdir -p $LIB_DIR/$KERNEL_VERSION_ARCH/module
     for MODULE in $(find $LIB_DIR -type f | egrep '\.ko$'); do
-        mv $MODULE $LIB_DIR/$KERNEL_VERSION_ARCH/module
+        [ "$(dirname $MODULE)" == "$LIB_DIR/$KERNEL_VERSION_ARCH/module" ] || mv $MODULE $LIB_DIR/$KERNEL_VERSION_ARCH/module
     done
     dkms mkdeb $ID -k $KERNEL_VERSION_ARCH --binaries-only
 
