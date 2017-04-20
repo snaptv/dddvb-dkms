@@ -3,10 +3,10 @@
 # configuration
 
 NAME=snaptv-dddvb
+sub_repo=dddvb
 build_command="make -j4"
-no_option_cmds="cfperdx"
+no_option_cmds="icfperdx"
 
-sub_repo=$(git submodule status | awk '{print $2}')
 KERNEL_VERSION=3.13.0-61-lowlatency
 KERNEL_ARCH=x86_64
 
@@ -35,7 +35,7 @@ Arguments:
   icfprdxz: Any combination of these command letters might be used
 
 Example:
-  sudo ./dkms-build.sh cfprdxz
+  sudo ./dkms-build.sh cfperdxz
 
 '
 [[ $cmds =~ h ]] && exit
@@ -52,10 +52,6 @@ function do_clean {
 }
 
 [[ $cmds =~ c ]] && do_clean $sub_repo
-
-if [[ $cmds =~ r ]]; then
-    [ $(dpkg --print-avail snaptv-package-builder | grep -i 'not available') ] && cmd="i$cmd"
-fi
 
 if [[ $cmds =~ i ]]; then
     apt-get update
