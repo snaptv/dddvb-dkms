@@ -4,9 +4,9 @@
 
 NAME=snaptv-dddvb
 build_command="make -j4"
+no_option_cmds="cfperdx"
 
 sub_repo=$(git submodule status | awk '{print $2}')
-no_option_cmds="cfprdx"
 KERNEL_VERSION=3.13.0-61-lowlatency
 KERNEL_ARCH=x86_64
 
@@ -25,6 +25,7 @@ Arguments:
      Makes a list of all modules the driver consists of.
      (The file "modules" normally contains a sub-set of these modules.)
   r: "build - rebuild"
+  e: Turn off error return check during build
   d: "Generate debian packet"
   x: "Clean up after build"
   z: "Install" install the debian package
@@ -100,7 +101,9 @@ fi
 [ -e ../modules ] && modules=$(cat ../modules) || modules='unknown'
 
 if [[ $cmds =~ m ]]; then
+    [[ $cmds =~ e ]] && set +e
     $build_command
+    set -e
     modules=$(find -name *.ko | awk -F/ '{print $NF}' | cut -d. -f1 | sort)
 fi
 
@@ -137,7 +140,7 @@ BUILD_EXCLUSIVE_KERNEL='^$KERNEL_VERSION'" > dkms.conf
     chmod 755 postinst
     mv control postinst /usr/src/$NAME-$FULL_VERSION/$NAME-dkms-mkdeb/debian/
 
-    set +e
+    [[ $cmds =~ e ]] && set +e
     dkms build $ID -k $KERNEL_VERSION_ARCH
     set -e
 
