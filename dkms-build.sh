@@ -5,7 +5,7 @@
 NAME=snaptv-dddvb
 sub_repo=dddvb
 build_command="make -j4"
-no_option_cmds="icfperdx"
+no_option_cmds="ifperdx"
 
 KERNEL_VERSION=3.13.0-61-lowlatency
 KERNEL_ARCH=x86_64
@@ -18,8 +18,7 @@ Arguments:
   No option: assume virtual env, do everything
   h: "help"
   i: "install" Prepare for build by installing required packages
-  c: clean
-  f: "Fetch sources
+  f: "fetch" Fetch clean version of sources (submodule repo)
   p: "Patch sources so they are prepared for compilation"
   m: "modules" Use to generate the file named "modules".
      Makes a list of all modules the driver consists of.
@@ -35,7 +34,7 @@ Arguments:
   icfprdxz: Any combination of these command letters might be used
 
 Example:
-  sudo ./dkms-build.sh cfperdxz
+  sudo ./dkms-build.sh fperdxz
 
 '
 [[ $cmds =~ h ]] && exit
@@ -45,13 +44,6 @@ function leave {
 }
 
 [ "$EUID" -ne 0 ] && leave "Please run as root"
-
-function do_clean {
-    [ -e $1 ] && rm -r $1
-    mkdir -p $1
-}
-
-[[ $cmds =~ c ]] && do_clean $sub_repo
 
 if [[ $cmds =~ i ]]; then
     apt-get update
@@ -72,8 +64,8 @@ if [[ $cmds =~ i ]]; then
 fi
 
 if [[ $cmds =~ f ]]; then
-    git submodule init
-    git submodule update
+    [ -e $sub_repo ] && rm -r $sub_repo
+    git submodule update --init
 fi
 
 LONGVER=$(snap-make-changelog -c | head -1)
