@@ -98,6 +98,9 @@ fi
 
 if [[ $cmds =~ r ]]; then
 
+    [ -e $SRC_DIR ] && leave "Unexpected folder $SRC_DIR, will not build"
+    [ -e $LIB_DIR ] && leave "Unexpected folder $LIB_DIR, will not build"
+
     rsync -uav --exclude=.git ./ $SRC_DIR >/dev/null
 
     echo "
