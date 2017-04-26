@@ -79,6 +79,7 @@ KERNEL_VERSION_ARCH=$KERNEL_VERSION/$KERNEL_ARCH
 FULL_VERSION=$VERSION-snaptv-$LONGVER
 ID=$NAME/$FULL_VERSION
 LIB_DIR=/var/lib/dkms/$ID
+SRC_DIR=/usr/src/$NAME-$FULL_VERSION
 
 if [[ $cmds =~ p ]]; then
     for file in $(find ../patches -type f | sort) ; do
@@ -97,7 +98,7 @@ fi
 
 if [[ $cmds =~ r ]]; then
 
-    rsync -uav --exclude=.git ./ /usr/src/$NAME-$FULL_VERSION >/dev/null
+    rsync -uav --exclude=.git ./ $SRC_DIR >/dev/null
 
     echo "
 PACKAGE_NAME=$NAME
@@ -113,20 +114,20 @@ BUILD_EXCLUSIVE_KERNEL='^$KERNEL_VERSION'" > dkms.conf
         num=$((num+1))
     done
 
-    mv dkms.conf /usr/src/$NAME-$FULL_VERSION
+    mv dkms.conf $SRC_DIR
 
     # copy template
-    sudo rsync -uav /etc/dkms/template-dkms-mkdeb/ /usr/src/$NAME-$FULL_VERSION/$NAME-dkms-mkdeb/
+    sudo rsync -uav /etc/dkms/template-dkms-mkdeb/ $SRC_DIR/$NAME-dkms-mkdeb/
 
     # manipulate postinst, dkms install to the correct kernel
     sed s/\\tdkms_configure/"\
 \\tdkms ldtarball \/usr\/share\/$NAME-dkms\/$NAME-$FULL_VERSION.dkms.tar.gz\\n\
 \\tdkms install -m $NAME -v $FULL_VERSION -k $KERNEL_VERSION\
-"/ </usr/src/$NAME-$FULL_VERSION/$NAME-dkms-mkdeb/debian/postinst >postinst
+"/ <$SRC_DIR/$NAME-dkms-mkdeb/debian/postinst >postinst
     # manipulate control, set dependent of kernel
-    sed s/Depends:/"Depends: linux-headers-$KERNEL_VERSION, linux-image-$KERNEL_VERSION,"/ </usr/src/$NAME-$FULL_VERSION/$NAME-dkms-mkdeb/debian/control >control
+    sed s/Depends:/"Depends: linux-headers-$KERNEL_VERSION, linux-image-$KERNEL_VERSION,"/ <$SRC_DIR/$NAME-dkms-mkdeb/debian/control >control
     chmod 755 postinst
-    mv control postinst /usr/src/$NAME-$FULL_VERSION/$NAME-dkms-mkdeb/debian/
+    mv control postinst $SRC_DIR/$NAME-dkms-mkdeb/debian/
 
     [[ $cmds =~ e ]] && set +e
     dkms build $ID -k $KERNEL_VERSION_ARCH
@@ -154,8 +155,8 @@ if [[ $cmds =~ d ]]; then
     pushd ~/"$HASH"
     dpkg -x $DEB x
     dpkg -e $DEB x/DEBIAN
-    mkdir -p x/usr/src/"$NAME"-"$FULL_VERSION"
-    cp /usr/src/"$NAME"-"$FULL_VERSION"/dkms.conf x/usr/src/"$NAME"-"$FULL_VERSION"
+    mkdir -p x$SRC_DIR
+    cp $SRC_DIR/dkms.conf x$SRC_DIR
     dpkg -b x ~
 
     popd
@@ -163,7 +164,7 @@ fi
 
 if [[ $cmds =~ x ]]; then
     dkms remove $ID -k $KERNEL_VERSION
-    rm -fr /usr/src/"$NAME"-"$FULL_VERSION"
+    rm -fr $SRC_DIR
     rm -fr ~/"$HASH"
 fi
 
