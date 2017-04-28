@@ -5,8 +5,9 @@
 NAME=snaptv-dddvb
 sub_repo=dddvb
 build_command="make -j4"
-no_option_cmds="ifperdx"
+no_option_cmds="ifpeErdx"
 
+KERNEL_RUNNING=$(uname -r)
 KERNEL_VERSION=3.13.0-61-lowlatency
 KERNEL_ARCH=x86_64
 
@@ -25,16 +26,18 @@ Arguments:
      (The file "modules" normally contains a sub-set of these modules.)
   r: "build - rebuild"
   e: Turn off error return check during build
+  E: No error check at all
   d: "Generate debian packet"
   x: "Clean up after build"
   z: "Install" install the debian package
 
   v: "View info about (alien) dkms sources and modules"
+  R: Ensure installed kernel is the kernel version this dkms module will be built for
 
   icfprdxz: Any combination of these command letters might be used
 
 Example:
-  sudo ./dkms-build.sh fperdxz
+  sudo ./dkms-build.sh fprdxz
 
 '
 [[ $cmds =~ h ]] && exit
@@ -44,6 +47,10 @@ function leave {
 }
 
 [ "$EUID" -ne 0 ] && leave "Please run as root"
+
+if [[ $cmds =~ R ]]; then
+    [ "$KERNEL_VERSION" == "$KERNEL_RUNNING" ] || leave 'This dkms build will fail due to wrong installed kernel'
+fi
 
 if [[ $cmds =~ i ]]; then
     apt-get update
@@ -134,7 +141,14 @@ BUILD_EXCLUSIVE_KERNEL='^$KERNEL_VERSION'" > dkms.conf
 
     [[ $cmds =~ e ]] && set +e
     dkms build $ID -k $KERNEL_VERSION_ARCH
+    DKMS_RET=$?
+    [[ $cmds =~ E ]] && DKMS_RET=0
     set -e
+    LOGS=$(find $LIB_DIR -type f | egrep '\.log$')
+    if [ "$LOGS" ] ; then
+        cat $LOGS
+    fi
+    [ "$DKMS_RET" -ne 0 ] && leave 'Compiler errors'
 
     mkdir -p $LIB_DIR/$KERNEL_VERSION_ARCH/module
     for MODULE in $(find $LIB_DIR -type f | egrep '\.ko$'); do
