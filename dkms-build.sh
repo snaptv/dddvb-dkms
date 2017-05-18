@@ -10,6 +10,7 @@ no_option_cmds="ifpeErdx"
 KERNEL_RUNNING=$(uname -r)
 KERNEL_VERSION=3.13.0-61-lowlatency
 KERNEL_ARCH=x86_64
+TOOL_BRANCH=master
 
 [ $# -ne 0 ] && cmds=$1 || cmds=$no_option_cmds
 helptext='
@@ -64,7 +65,7 @@ if [[ $cmds =~ i ]]; then
             linux-headers-$KERNEL_VERSION \
             wget \
             curl
-    curl http://apt.snap.tv/bootstrap.sh | sh -s master
+    curl http://apt.snap.tv/bootstrap.sh | sh -s $TOOL_BRANCH
     apt-get update
     apt-get install -y \
             snaptv-package-builder
