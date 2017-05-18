@@ -8,9 +8,9 @@ build_command="make -j4"
 no_option_cmds="ifpeErdx"
 
 KERNEL_RUNNING=$(uname -r)
-KERNEL_VERSION=3.13.0-61-lowlatency
+KERNEL_VERSION=4.8.0-52-lowlatency
 KERNEL_ARCH=x86_64
-TOOL_BRANCH=master
+TOOL_BRANCH=xenial
 
 [ $# -ne 0 ] && cmds=$1 || cmds=$no_option_cmds
 helptext='
