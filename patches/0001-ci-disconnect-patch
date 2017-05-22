@@ -1,8 +1,8 @@
 diff --git a/ddbridge/ddbridge-core.c b/ddbridge/ddbridge-core.c
-index a5e7216..904f667 100644
+index 9b5eaad..e08bcb8 100644
 --- a/ddbridge/ddbridge-core.c
 +++ b/ddbridge/ddbridge-core.c
-@@ -467,6 +467,22 @@ done:
+@@ -491,6 +491,22 @@ done:
  	return 0;
  }
  
@@ -25,7 +25,7 @@ index a5e7216..904f667 100644
  static int ddb_redirect(u32 i, u32 p)
  {
  	struct ddb *idev = ddbs[(i >> 4) & 0x3f];
-@@ -474,6 +490,8 @@ static int ddb_redirect(u32 i, u32 p)
+@@ -498,6 +514,8 @@ static int ddb_redirect(u32 i, u32 p)
  	struct ddb *pdev = ddbs[(p >> 4) & 0x3f];
  	struct ddb_port *port;
  
@@ -34,7 +34,7 @@ index a5e7216..904f667 100644
  	if (!idev->has_dma || !pdev->has_dma)
  		return -EINVAL;
  	if (!idev || !pdev)
-@@ -506,6 +524,7 @@ static int ddb_redirect(u32 i, u32 p)
+@@ -530,6 +548,7 @@ static int ddb_redirect(u32 i, u32 p)
  			input2->redi = input;
  	}
  	input->redo = port->output;
@@ -43,10 +43,10 @@ index a5e7216..904f667 100644
  
  	ddb_redirect_dma(input->port->dev, input->dma, port->output->dma);
 diff --git a/ddbridge/ddbridge.h b/ddbridge/ddbridge.h
-index d120938..21a2914 100644
+index 28dd20d..fa509c3 100644
 --- a/ddbridge/ddbridge.h
 +++ b/ddbridge/ddbridge.h
-@@ -268,6 +268,7 @@ struct ddb_io {
+@@ -273,6 +273,7 @@ struct ddb_io {
  	struct ddb_dma        *dma;
  	struct ddb_io         *redo;
  	struct ddb_io         *redi;
