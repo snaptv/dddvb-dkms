@@ -7,12 +7,12 @@ sub_repo=dddvb
 build_command="make -j4"
 no_option_cmds="ifpeErdx"
 
-KERNEL_RUNNING=$(uname -r)
-KERNEL_VERSION=4.8.0-52-lowlatency
+[ $# -ne 0 ] && cmds=$1 || cmds=$no_option_cmds
+
+[[ $cmds =~ K ]] && KERNEL_VERSION=$(uname -r) || KERNEL_VERSION=4.8.0-52-lowlatency
 KERNEL_ARCH=x86_64
 TOOL_BRANCH=xenial
 
-[ $# -ne 0 ] && cmds=$1 || cmds=$no_option_cmds
 helptext='
 
 Script that produces the debian package of the drivers (dkms-binary-style)
@@ -33,12 +33,11 @@ Arguments:
   z: "Install" install the debian package
 
   v: "View info about (alien) dkms sources and modules"
-  R: Ensure installed kernel is the kernel version this dkms module will be built for
+  K: Build for the build environment currently installed kernel
 
-  icfprdxz: Any combination of these command letters might be used
-
-Example:
-  sudo ./dkms-build.sh fprdxz
+Examples:
+  sudo ./dkms-build.sh Ki        (to install the build tools (current kernel))
+  sudo ./dkms-build.sh KfpeErdx  (to build the package for current kernel)
 
 '
 [[ $cmds =~ h ]] && exit
@@ -48,10 +47,6 @@ function leave {
 }
 
 [ "$EUID" -ne 0 ] && leave "Please run as root"
-
-if [[ $cmds =~ R ]]; then
-    [ "$KERNEL_VERSION" == "$KERNEL_RUNNING" ] || leave 'This dkms build will fail due to wrong installed kernel'
-fi
 
 if [[ $cmds =~ i ]]; then
     apt-get update
