@@ -43,7 +43,7 @@ Examples:
 [[ $cmds =~ h ]] && exit
 
 function leave {
-    exit
+    exit 1
 }
 
 [ "$EUID" -ne 0 ] && leave "Please run as root"
@@ -90,6 +90,11 @@ if [[ $cmds =~ p ]]; then
     done
 fi
 
+for file in $(egrep -r '\$\(shell uname -r\)' * | sed 's/:.*$//') ; do
+    cat $file | sed 's/\$(shell uname -r)/'"$KERNEL_VERSION"'/g' >mfile
+    mv mfile $file
+done
+
 [ -e ../modules ] && modules=$(cat ../modules) || modules='unknown'
 
 if [[ $cmds =~ m ]]; then
@@ -123,7 +128,7 @@ BUILD_EXCLUSIVE_KERNEL='^$KERNEL_VERSION'" > dkms.conf
     mv dkms.conf $SRC_DIR
 
     # copy template
-    sudo rsync -uav /etc/dkms/template-dkms-mkdeb/ $SRC_DIR/$NAME-dkms-mkdeb/
+    rsync -uav /etc/dkms/template-dkms-mkdeb/ $SRC_DIR/$NAME-dkms-mkdeb/
 
     # manipulate postinst, dkms install to the correct kernel
     sed s/\\tdkms_configure/"\
