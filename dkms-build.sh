@@ -59,6 +59,7 @@ if [[ $cmds =~ i ]]; then
             libproc-processtable-perl \
             linux-headers-$KERNEL_VERSION \
             wget \
+            sudo \
             curl
     curl http://apt.snap.tv/bootstrap.sh | sh -s $TOOL_BRANCH
     apt-get update
