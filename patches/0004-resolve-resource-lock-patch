@@ -1,8 +1,8 @@
 diff --git a/ddbridge/ddbridge-core.c b/ddbridge/ddbridge-core.c
-index 904f667..c922690 100644
+index e08bcb8..296eaed 100644
 --- a/ddbridge/ddbridge-core.c
 +++ b/ddbridge/ddbridge-core.c
-@@ -427,6 +427,8 @@ static void ddb_redirect_dma(struct ddb *dev,
+@@ -451,6 +451,8 @@ static void ddb_redirect_dma(struct ddb *dev,
  	}
  }
  
@@ -11,7 +11,7 @@ index 904f667..c922690 100644
  static int ddb_unredirect(struct ddb_port *port)
  {
  	struct ddb_input *oredi, *iredi = 0;
-@@ -436,6 +438,8 @@ static int ddb_unredirect(struct ddb_port *port)
+@@ -460,6 +462,8 @@ static int ddb_unredirect(struct ddb_port *port)
  	mutex_lock(&redirect_lock);
  	if (port->output->dma->running) {
  		mutex_unlock(&redirect_lock);
@@ -20,7 +20,7 @@ index 904f667..c922690 100644
  		return -EBUSY;
  	}
  	oredi = port->output->redi;
-@@ -4707,9 +4711,9 @@ static ssize_t redirect_store(struct device *device,
+@@ -4767,9 +4771,9 @@ static ssize_t redirect_store(struct device *device,
  	if (sscanf(buf, "%x %x\n", &i, &p) != 2)
  		return -EINVAL;
  	res = ddb_redirect(i, p);
@@ -31,7 +31,7 @@ index 904f667..c922690 100644
  	return count;
  }
  
-@@ -4731,9 +4735,9 @@ static ssize_t redirect2_store(struct device *device,
+@@ -4792,9 +4796,9 @@ static ssize_t redirect2_store(struct device *device,
  	if (sscanf(buf, "%x %x\n", &i, &p) != 2)
  		return -EINVAL;
  	res = ddb_redirect(i, p);
@@ -41,4 +41,4 @@ index 904f667..c922690 100644
 -	pr_info("DDBridge: redirect: %02x, %02x\n", i, p);
  	return count;
  }
- 
+ #endif

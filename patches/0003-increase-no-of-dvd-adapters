@@ -1,5 +1,5 @@
 diff --git a/dvb-core/dvbdev.h b/dvb-core/dvbdev.h
-index e534ef1..317c83b 100644
+index 5a559e9..44f8d22 100644
 --- a/dvb-core/dvbdev.h
 +++ b/dvb-core/dvbdev.h
 @@ -30,11 +30,7 @@
@@ -9,9 +9,9 @@ index e534ef1..317c83b 100644
 -#if defined(CONFIG_DVB_MAX_ADAPTERS) && CONFIG_DVB_MAX_ADAPTERS > 0
 -  #define DVB_MAX_ADAPTERS CONFIG_DVB_MAX_ADAPTERS
 -#else
--  #define DVB_MAX_ADAPTERS 8
+-  #define DVB_MAX_ADAPTERS 64
 -#endif
-+#define DVB_MAX_ADAPTERS 56
++#define DVB_MAX_ADAPTERS 64
  
  #define DVB_UNSET (-1)
  

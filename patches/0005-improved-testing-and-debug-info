@@ -1,8 +1,8 @@
 diff --git a/ddbridge/ddbridge-core.c b/ddbridge/ddbridge-core.c
-index c922690..1dd5e64 100644
+index 296eaed..cd1dc9f 100644
 --- a/ddbridge/ddbridge-core.c
 +++ b/ddbridge/ddbridge-core.c
-@@ -475,16 +475,23 @@ static int disconnect_input(u32 i)
+@@ -499,16 +499,23 @@ static int disconnect_input(u32 i)
  {
  	struct ddb *idev = ddbs[(i >> 4) & 0x1f];
  	struct ddb_input *input;
@@ -29,7 +29,7 @@ index c922690..1dd5e64 100644
  }
  
  static int ddb_redirect(u32 i, u32 p)
-@@ -493,30 +500,44 @@ static int ddb_redirect(u32 i, u32 p)
+@@ -517,30 +524,44 @@ static int ddb_redirect(u32 i, u32 p)
  	struct ddb_input *input, *input2;
  	struct ddb *pdev = ddbs[(p >> 4) & 0x3f];
  	struct ddb_port *port;
