@@ -5,16 +5,14 @@
 NAME=snaptv-dddvb
 sub_repo=dddvb
 build_command="make -j4"
-no_option_cmds="ifpeErdxR"
-
-[ $# -ne 0 ] && cmds=$1 || cmds=$no_option_cmds
+no_option_cmds="ifpeErdx"
 
 KERNEL_RUNNING=$(uname -r)
 KERNEL_VERSION=3.13.0-61-lowlatency
 KERNEL_ARCH=x86_64
 TOOL_BRANCH=master
-[[ $cmds =~ K ]] && KERNEL_VERSION=$(uname -r)
 
+[ $# -ne 0 ] && cmds=$1 || cmds=$no_option_cmds
 helptext='
 
 Script that produces the debian package of the drivers (dkms-binary-style)
@@ -35,18 +33,18 @@ Arguments:
   z: "Install" install the debian package
 
   v: "View info about (alien) dkms sources and modules"
-  K: Build for the build environment currently installed kernel
   R: Ensure installed kernel is the kernel version this dkms module will be built for
 
-Examples:
-  sudo ./dkms-build.sh Ki        (to install the build tools (current kernel))
-  sudo ./dkms-build.sh KfpeErdx  (to build the package for current kernel)
+  icfprdxz: Any combination of these command letters might be used
+
+Example:
+  sudo ./dkms-build.sh fprdxz
 
 '
 [[ $cmds =~ h ]] && exit
 
 function leave {
-    exit 1
+    exit
 }
 
 [ "$EUID" -ne 0 ] && leave "Please run as root"
