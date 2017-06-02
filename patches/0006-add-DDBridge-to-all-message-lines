@@ -1,8 +1,8 @@
 diff --git a/ddbridge/ddbridge-core.c b/ddbridge/ddbridge-core.c
-index 1dd5e64..ab88684 100644
+index cd1dc9f..b20e1fd 100644
 --- a/ddbridge/ddbridge-core.c
 +++ b/ddbridge/ddbridge-core.c
-@@ -438,7 +438,7 @@ static int ddb_unredirect(struct ddb_port *port)
+@@ -462,7 +462,7 @@ static int ddb_unredirect(struct ddb_port *port)
  	mutex_lock(&redirect_lock);
  	if (port->output->dma->running) {
  		mutex_unlock(&redirect_lock);
@@ -11,7 +11,7 @@ index 1dd5e64..ab88684 100644
  		ddb_output_stop(port->output); // so that it woun't fail next time hopefully
  		return -EBUSY;
  	}
-@@ -478,13 +478,13 @@ static int disconnect_input(u32 i)
+@@ -502,13 +502,13 @@ static int disconnect_input(u32 i)
  	int ret = 0;
  
  	if (!idev) {
@@ -27,7 +27,7 @@ index 1dd5e64..ab88684 100644
  		return -EINVAL;
  	}
  	if (input->connected_ci_port) {
-@@ -509,17 +509,17 @@ static int ddb_redirect(u32 i, u32 p)
+@@ -533,17 +533,17 @@ static int ddb_redirect(u32 i, u32 p)
  	else if (!idev->has_dma) line = __LINE__;
  	else if (!pdev->has_dma) line = __LINE__;
  	if (line) {
@@ -48,7 +48,7 @@ index 1dd5e64..ab88684 100644
  		return -EBUSY;
  	}
  
-@@ -528,7 +528,7 @@ static int ddb_redirect(u32 i, u32 p)
+@@ -552,7 +552,7 @@ static int ddb_redirect(u32 i, u32 p)
  
  	input = &idev->input[i & 7];
  	if (!input) {
@@ -57,7 +57,7 @@ index 1dd5e64..ab88684 100644
  		return -EINVAL;
  	}
  
-@@ -537,7 +537,7 @@ static int ddb_redirect(u32 i, u32 p)
+@@ -561,7 +561,7 @@ static int ddb_redirect(u32 i, u32 p)
  	else if (input->dma->running)   line = __LINE__;
  	if (line) {
  		mutex_unlock(&redirect_lock);

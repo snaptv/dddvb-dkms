@@ -7,11 +7,12 @@ sub_repo=dddvb
 build_command="make -j4"
 no_option_cmds="ifpeErdx"
 
-KERNEL_RUNNING=$(uname -r)
-KERNEL_VERSION=3.13.0-61-lowlatency
-KERNEL_ARCH=x86_64
-
 [ $# -ne 0 ] && cmds=$1 || cmds=$no_option_cmds
+
+[[ $cmds =~ K ]] && KERNEL_VERSION=$(uname -r) || KERNEL_VERSION=3.13.0-61-lowlatency
+KERNEL_ARCH=x86_64
+TOOL_BRANCH=master
+
 helptext='
 
 Script that produces the debian package of the drivers (dkms-binary-style)
@@ -32,25 +33,20 @@ Arguments:
   z: "Install" install the debian package
 
   v: "View info about (alien) dkms sources and modules"
-  R: Ensure installed kernel is the kernel version this dkms module will be built for
+  K: Build for the build environment currently installed kernel
 
-  icfprdxz: Any combination of these command letters might be used
-
-Example:
-  sudo ./dkms-build.sh fprdxz
+Examples:
+  sudo ./dkms-build.sh Ki        (to install the build tools (current kernel))
+  sudo ./dkms-build.sh KfpeErdx  (to build the package for current kernel)
 
 '
 [[ $cmds =~ h ]] && exit
 
 function leave {
-    exit
+    exit 1
 }
 
 [ "$EUID" -ne 0 ] && leave "Please run as root"
-
-if [[ $cmds =~ R ]]; then
-    [ "$KERNEL_VERSION" == "$KERNEL_RUNNING" ] || leave 'This dkms build will fail due to wrong installed kernel'
-fi
 
 if [[ $cmds =~ i ]]; then
     apt-get update
@@ -63,8 +59,9 @@ if [[ $cmds =~ i ]]; then
             libproc-processtable-perl \
             linux-headers-$KERNEL_VERSION \
             wget \
+            sudo \
             curl
-    curl http://apt.snap.tv/bootstrap.sh | sh -s master
+    curl http://apt.snap.tv/bootstrap.sh | sh -s $TOOL_BRANCH
     apt-get update
     apt-get install -y \
             snaptv-package-builder
@@ -93,6 +90,11 @@ if [[ $cmds =~ p ]]; then
         patch -p1 <$file
     done
 fi
+
+for file in $(egrep -r '\$\(shell uname -r\)' * | sed 's/:.*$//') ; do
+    cat $file | sed 's/\$(shell uname -r)/'"$KERNEL_VERSION"'/g' >mfile
+    mv mfile $file
+done
 
 [ -e ../modules ] && modules=$(cat ../modules) || modules='unknown'
 
@@ -127,7 +129,7 @@ BUILD_EXCLUSIVE_KERNEL='^$KERNEL_VERSION'" > dkms.conf
     mv dkms.conf $SRC_DIR
 
     # copy template
-    sudo rsync -uav /etc/dkms/template-dkms-mkdeb/ $SRC_DIR/$NAME-dkms-mkdeb/
+    rsync -uav /etc/dkms/template-dkms-mkdeb/ $SRC_DIR/$NAME-dkms-mkdeb/
 
     # manipulate postinst, dkms install to the correct kernel
     sed s/\\tdkms_configure/"\
