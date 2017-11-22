@@ -5,7 +5,7 @@
 NAME=snaptv-dddvb
 sub_repo=dddvb
 build_command="make -j4"
-no_option_cmds="ifpeErdx"
+no_option_cmds="ifpkeErdx"
 
 [ $# -ne 0 ] && cmds=$1 || cmds=$no_option_cmds
 
@@ -20,8 +20,10 @@ Arguments:
   No option: assume virtual env, do everything
   h: "help"
   i: "install" Prepare for build by installing required packages
+  K: Build for the build environment currently installed kernel
   f: "fetch" Fetch clean version of sources (submodule repo)
   p: "Patch sources so they are prepared for compilation"
+  k: Patch sources for the build environment
   m: "modules" Use to generate the file named "modules".
      Makes a list of all modules the driver consists of.
      (The file "modules" normally contains a sub-set of these modules.)
@@ -33,11 +35,10 @@ Arguments:
   z: "Install" install the debian package
 
   v: "View info about (alien) dkms sources and modules"
-  K: Build for the build environment currently installed kernel
 
 Examples:
   sudo ./dkms-build.sh Ki        (to install the build tools (current kernel))
-  sudo ./dkms-build.sh KfpeErdx  (to build the package for current kernel)
+  sudo ./dkms-build.sh KfpkeErdxz  (to build and install the package for current kernel)
 
 '
 [[ $cmds =~ h ]] && exit
@@ -91,10 +92,12 @@ if [[ $cmds =~ p ]]; then
     done
 fi
 
-for file in $(egrep -r '\$\(shell uname -r\)' * | sed 's/:.*$//') ; do
-    cat $file | sed 's/\$(shell uname -r)/'"$KERNEL_VERSION"'/g' >mfile
-    mv mfile $file
-done
+if [[ $cmds =~ k ]]; then
+    for file in $(egrep -r '\$\(shell uname -r\)' * | sed 's/:.*$//') ; do
+        cat $file | sed 's/\$(shell uname -r)/'"$KERNEL_VERSION"'/g' >mfile
+        mv mfile $file
+    done
+fi
 
 [ -e ../modules ] && modules=$(cat ../modules) || modules='unknown'
 
