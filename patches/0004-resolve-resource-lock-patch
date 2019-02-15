@@ -1,0 +1,44 @@
+diff --git a/ddbridge/ddbridge-core.c b/ddbridge/ddbridge-core.c
+index e08bcb8..296eaed 100644
+--- a/ddbridge/ddbridge-core.c
++++ b/ddbridge/ddbridge-core.c
+@@ -451,6 +451,8 @@ static void ddb_redirect_dma(struct ddb *dev,
+ 	}
+ }
+ 
++static void ddb_output_stop(struct ddb_output *output);
++
+ static int ddb_unredirect(struct ddb_port *port)
+ {
+ 	struct ddb_input *oredi, *iredi = 0;
+@@ -460,6 +462,8 @@ static int ddb_unredirect(struct ddb_port *port)
+ 	mutex_lock(&redirect_lock);
+ 	if (port->output->dma->running) {
+ 		mutex_unlock(&redirect_lock);
++		pr_info("ddb_unredirect %d.%d failed\n", port->dev->nr, port->nr);
++		ddb_output_stop(port->output); // so that it woun't fail next time hopefully
+ 		return -EBUSY;
+ 	}
+ 	oredi = port->output->redi;
+@@ -4767,9 +4771,9 @@ static ssize_t redirect_store(struct device *device,
+ 	if (sscanf(buf, "%x %x\n", &i, &p) != 2)
+ 		return -EINVAL;
+ 	res = ddb_redirect(i, p);
++	pr_info("DDBridge: redirect: %02x, %02x (%d %d)\n", i, p, res, count);
+ 	if (res < 0)
+ 		return res;
+-	pr_info("DDBridge: redirect: %02x, %02x\n", i, p);
+ 	return count;
+ }
+ 
+@@ -4792,9 +4796,9 @@ static ssize_t redirect2_store(struct device *device,
+ 	if (sscanf(buf, "%x %x\n", &i, &p) != 2)
+ 		return -EINVAL;
+ 	res = ddb_redirect(i, p);
++	pr_info("DDBridge: redirect2: %02x, %02x (%d %d)\n", i, p, res, count);
+ 	if (res < 0)
+ 		return res;
+-	pr_info("DDBridge: redirect: %02x, %02x\n", i, p);
+ 	return count;
+ }
+ #endif
