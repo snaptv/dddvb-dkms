@@ -72,15 +72,14 @@ if [[ $cmds =~ f ]]; then
     git submodule update --init
 fi
 
-LONGVER=$(snap-make-changelog -c | head -1)
+FULL_VERSION=$(snap-make-changelog -c | head -1)
 
 pushd $sub_repo
 
 HASH=$(git describe --tag --always HEAD)
-VERSION=$(echo $HASH | sed 's/-g.......$//')
 
 KERNEL_VERSION_ARCH=$KERNEL_VERSION/$KERNEL_ARCH
-FULL_VERSION=$VERSION-snaptv-$LONGVER
+
 ID=$NAME/$FULL_VERSION
 LIB_DIR=/var/lib/dkms/$ID
 SRC_DIR=/usr/src/$NAME-$FULL_VERSION
